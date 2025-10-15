@@ -1,0 +1,23 @@
+body{
+  background:LightSkyBlue;
+  font-family:sans-serif;
+  display:flex;     /* NUEVO */
+}
+form,table{         /* NUEVO */
+  background:white;
+  margin:auto;
+  padding:20px;
+                    /* He quitado del width */
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+input{
+  padding:5px;
+  border:1px solid LightSkyBlue;
+}
+input[type="submit"]{
+  background:LightSkyBlue;
+  color:white;
+  border:none;
+}
