@@ -117,6 +117,7 @@
         }
         tarjetas.push(objeto)
         localStorage.setItem("cartitas",JSON.stringify(tarjetas));
+        enviarFetch()
         repintar(); ///////////////////////////////// VUELVE A PINTAR LAS TARJETAS
         document.querySelector("#contienemodal").style.display = "none"
       }
@@ -144,12 +145,40 @@
           clontarjeta.querySelector(".eliminar").onclick = function(){
             tarjetas.splice(this.getAttribute("rosalee_eliminar"),1)
             localStorage.setItem("cartitas",JSON.stringify(tarjetas));
+            enviarFetch()
             repintar()
           }
           contenedortarjetas.appendChild(clontarjeta)
         }
       }
       repintar(); /////////////////// PARA QUE SE EJECUTE AL PRINCIPIO
+      enviarFetch()
+      
+       async function enviarFetch(){
+          try {
+            const resp = await fetch("002-api.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(tarjetas)
+            });
+            const tipo = resp.headers.get('content-type') || '';
+            let data = null;
+            if (tipo.includes('application/json')) {
+              data = await resp.json();
+            } else {
+              // por si el servidor devuelve texto/HTML en errores
+              data = { ok: resp.ok, status: resp.status, text: await resp.text() };
+            }
+            if (!resp.ok || (data && data.ok === false)) {
+              console.error("Error del servidor", data);
+            } else {
+              console.log("Guardado OK", data);
+            }
+          } catch (err) {
+            console.error("Fallo de red o CORS", err);
+          }
+        }
+      
     </script>
   </body>
 </html>
