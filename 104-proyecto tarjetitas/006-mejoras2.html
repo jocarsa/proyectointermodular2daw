@@ -1,0 +1,460 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Plantillas</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="http://jocarsa.github.io/cssreset/cssreset.css">
+  <style>
+    :root{
+      --bg: #0f1020;
+      --bg2: #17182e;
+      --accent: #8b5cf6;   /* violet-500 */
+      --accent-2: #a78bfa; /* violet-400 */
+      --text: #e7e7f7;
+      --muted: #a8b0c0;
+      --card: rgba(255,255,255,0.06);
+      --glass: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --speed: .2s;
+    }
+
+    html, body { height:100%; }
+    body{
+      display:flex; gap:16px; padding:16px;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background:
+        radial-gradient(1000px 800px at 10% -20%, #1f1140 0%, transparent 60%),
+        radial-gradient(1000px 800px at 90% 120%, #102842 0%, transparent 60%),
+        var(--bg);
+      color: var(--text);
+      overflow:hidden;
+    }
+
+    nav{
+      flex:1; min-width:220px; max-width:240px;
+      display:flex; flex-direction:column; gap:12px;
+      background: var(--glass);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      padding: 12px;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+      height: calc(100vh - 32px);
+      overflow: auto;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; padding:10px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, rgba(139,92,246,.25), rgba(167,139,250,.15));
+      color:white; font-weight:700; letter-spacing:.5px;
+    }
+    .brand .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--accent-2); box-shadow:0 0 20px var(--accent);
+    }
+
+    .menu button{
+      border:none; background: transparent;
+      color: var(--text); text-align:left; padding:10px 12px;
+      border-radius: var(--radius-sm);
+      display:flex; align-items:center; gap:10px;
+      cursor:pointer; transition: background var(--speed), transform var(--speed);
+    }
+    .menu button:hover{ background: rgba(255,255,255,0.06); transform: translateX(2px); }
+    .menu .inicial{
+      width:26px;height:26px;border-radius:50%; display:inline-grid; place-items:center;
+      background: var(--text); color:#4b0082; font-weight:800;
+    }
+    .menu .texto{ opacity:.9; }
+
+    .btn-primary{
+      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      color:white; border:none; padding:10px 12px; border-radius: 999px; cursor:pointer;
+      transition: filter var(--speed), transform var(--speed);
+      box-shadow: 0 10px 20px rgba(139,92,246,0.25);
+    }
+    .btn-primary:hover{ filter: brightness(1.1); transform: translateY(-1px); }
+
+    main{
+      flex:8; display:grid; grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:12px; padding:12px; height: calc(100vh - 32px); overflow:auto;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: var(--shadow);
+    }
+
+    .tarjeta{
+      position:relative; background: var(--card);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: transform var(--speed), box-shadow var(--speed), border-color var(--speed);
+    }
+    .tarjeta.dragging{
+      opacity: .85; transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,.45);
+      border-color: var(--accent-2);
+    }
+    .tarjeta header{
+      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      color:white; padding:12px; font-weight:700; letter-spacing:.3px;
+      display:flex; align-items:center; justify-content: space-between;
+    }
+    .drag-handle{
+      cursor: grab; user-select:none; font-size:14px; opacity:.9;
+    }
+    .tarjeta section{ padding:12px; color: var(--text); }
+    .tarjeta .eliminar{
+      position:absolute; right:8px; top:8px; width:26px; height:26px;
+      border:none; border-radius:8px; background: rgba(255,255,255,0.85); color:#5b21b6;
+      font-size:14px; cursor:pointer; display:grid; place-items:center;
+      transition: transform var(--speed);
+    }
+    .tarjeta .eliminar:hover{ transform: scale(1.06); }
+
+    /* Modal base */
+    .overlay{
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      display:none; align-items:center; justify-content:center; z-index: 20;
+      backdrop-filter: blur(2px);
+    }
+    .modal{
+      width: 520px; max-width: 92vw;
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px; color: var(--text);
+    }
+    .modal h2{ margin: 0 0 8px 0; }
+    .modal label{ font-size:12px; color: var(--muted); }
+    .modal input, .modal textarea, .modal select{
+      width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08); color: var(--text); margin-bottom:8px;
+      outline: none;
+    }
+    .modal .actions{ display:flex; gap:8px; justify-content:flex-end; }
+
+    /* Auth modal */
+    #authOverlay{ display:flex; }
+    .tabs{ display:flex; gap:8px; margin-bottom:10px; }
+    .tab{
+      padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.06); color: var(--text); cursor:pointer;
+    }
+    .tab.active{ background: linear-gradient(135deg, var(--accent), #6d28d9); border-color: transparent; }
+
+    /* Helper */
+    .hidden{ display:none !important; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand"><span class="dot"></span> Plantillas</div>
+    <div class="menu" id="menu"></div>
+    <button id="btnNueva" class="btn-primary">➕ Crear nueva</button>
+    <button id="btnLogout" class="btn-primary" style="margin-top:auto;background:linear-gradient(135deg,#ef4444,#b91c1c)">Cerrar sesión</button>
+  </nav>
+
+  <main id="tablero"></main>
+
+  <!-- Template menú -->
+  <template id="tplMenuBtn">
+    <button>
+      <span class="inicial">L</span>
+      <span class="texto">Letra</span>
+    </button>
+  </template>
+
+  <!-- Template tarjeta -->
+  <template id="tplTarjeta">
+    <article class="tarjeta" draggable="true">
+      <button class="eliminar" title="Eliminar">✕</button>
+      <header>
+        <span class="titulo">Cabecera de prueba</span>
+        <span class="drag-handle" title="Arrastra para reordenar">⠿</span>
+      </header>
+      <section>Contenido de prueba</section>
+    </article>
+  </template>
+
+  <!-- Modal Nueva tarjeta -->
+  <div id="newOverlay" class="overlay">
+    <div class="modal">
+      <h2>Nueva tarjeta</h2>
+      <label>Título</label>
+      <input type="text" id="nt_titulo" placeholder="Título">
+      <label>Contenido</label>
+      <textarea id="nt_contenido" rows="5" placeholder="Contenido"></textarea>
+      <label>Columnas (span)</label>
+      <input type="number" id="nt_cols" min="1" max="5" value="1">
+      <label>Filas (span)</label>
+      <input type="number" id="nt_rows" min="1" max="5" value="1">
+      <label>Color</label>
+      <input type="color" id="nt_color" value="#201a3a">
+      <div class="actions">
+        <button class="tab" id="nt_cancel">Cancelar</button>
+        <button class="btn-primary" id="nt_save">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Auth (login / signin) -->
+  <div id="authOverlay" class="overlay">
+    <div class="modal">
+      <h2>Acceso</h2>
+      <div class="tabs">
+        <button id="tabLogin"  class="tab active">Iniciar sesión</button>
+        <button id="tabSignin" class="tab">Crear cuenta</button>
+      </div>
+
+      <div id="panelLogin">
+        <label>Usuario</label>
+        <input type="text" id="login_usuario" placeholder="tu_usuario">
+        <label>Contraseña</label>
+        <input type="password" id="login_password" placeholder="••••••••">
+        <div class="actions">
+          <button id="btnLogin" class="btn-primary">Entrar</button>
+        </div>
+      </div>
+
+      <div id="panelSignin" class="hidden">
+        <label>Usuario</label>
+        <input type="text" id="signin_usuario" placeholder="elige_usuario">
+        <label>Contraseña</label>
+        <input type="password" id="signin_password" placeholder="••••••••">
+        <div class="actions">
+          <button id="btnSignin" class="btn-primary">Crear cuenta</button>
+        </div>
+      </div>
+
+      <div id="authMsg" style="margin-top:6px;color:#fca5a5;"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "006-api.php";
+
+    // ---------- Estado ----------
+    let usuario = null;
+    let password = null;
+    let tarjetas = [];
+
+    // ---------- UI ----------
+    const tablero = document.getElementById("tablero");
+    const menu = document.getElementById("menu");
+    const tplMenuBtn = document.getElementById("tplMenuBtn");
+    const tplTarjeta = document.getElementById("tplTarjeta");
+
+    const newOverlay = document.getElementById("newOverlay");
+    const authOverlay = document.getElementById("authOverlay");
+
+    // Menú de ejemplo
+    const elementosmenu = ["inicio","productos","clientes","pedidos","stock","empleados"];
+    for (const el of elementosmenu){
+      const c = tplMenuBtn.content.cloneNode(true);
+      c.querySelector(".texto").textContent = el;
+      c.querySelector(".inicial").textContent = el[0].toUpperCase();
+      menu.appendChild(c);
+    }
+
+    document.getElementById("btnNueva").onclick = () => newOverlay.style.display = "flex";
+    document.getElementById("nt_cancel").onclick = () => newOverlay.style.display = "none";
+
+    document.getElementById("btnLogout").onclick = () => {
+      usuario = null; password = null; tarjetas = [];
+      localStorage.removeItem("plantillas_user");
+      localStorage.removeItem("plantillas_pass");
+      tablero.innerHTML = "";
+      authOverlay.style.display = "flex";
+    };
+
+    // ---------- Auth Tabs ----------
+    const tabLogin  = document.getElementById("tabLogin");
+    const tabSignin = document.getElementById("tabSignin");
+    const panelLogin  = document.getElementById("panelLogin");
+    const panelSignin = document.getElementById("panelSignin");
+    const authMsg = document.getElementById("authMsg");
+
+    tabLogin.onclick = () => {
+      tabLogin.classList.add("active"); tabSignin.classList.remove("active");
+      panelLogin.classList.remove("hidden"); panelSignin.classList.add("hidden");
+      authMsg.textContent = "";
+    };
+    tabSignin.onclick = () => {
+      tabSignin.classList.add("active"); tabLogin.classList.remove("active");
+      panelSignin.classList.remove("hidden"); panelLogin.classList.add("hidden");
+      authMsg.textContent = "";
+    };
+
+    // ---------- Auth Actions ----------
+    document.getElementById("btnSignin").onclick = async () => {
+      const u = document.getElementById("signin_usuario").value.trim();
+      const p = document.getElementById("signin_password").value;
+      if (!u || !p) { authMsg.textContent = "Rellena usuario y contraseña"; return; }
+      const r = await api({accion:"signin", usuario:u, password:p});
+      if (!r.ok) { authMsg.textContent = r.error || "Error al crear cuenta"; return; }
+      authMsg.style.color = "#86efac"; authMsg.textContent = "Cuenta creada. ¡Ahora inicia sesión!";
+      tabLogin.click();
+      document.getElementById("login_usuario").value = u;
+    };
+
+    document.getElementById("btnLogin").onclick = async () => {
+      const u = document.getElementById("login_usuario").value.trim();
+      const p = document.getElementById("login_password").value;
+      if (!u || !p) { authMsg.textContent = "Rellena usuario y contraseña"; return; }
+      const r = await api({accion:"login", usuario:u, password:p});
+      if (!r.ok) { authMsg.textContent = r.error || "Credenciales inválidas"; return; }
+      usuario = u; password = p;
+      localStorage.setItem("plantillas_user", usuario);
+      localStorage.setItem("plantillas_pass", password);
+      authMsg.textContent = "";
+      authOverlay.style.display = "none";
+      await loadData();
+    };
+
+    // Auto-intento con credenciales guardadas
+    (async function bootstrap(){
+      const lu = localStorage.getItem("plantillas_user");
+      const lp = localStorage.getItem("plantillas_pass");
+      if (lu && lp){
+        const r = await api({accion:"login", usuario:lu, password:lp});
+        if (r.ok){
+          usuario = lu; password = lp; authOverlay.style.display = "none";
+          await loadData();
+          return;
+        }
+      }
+      authOverlay.style.display = "flex";
+    })();
+
+    // ---------- API ----------
+    async function api(payload){
+      try{
+        const resp = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const tipo = resp.headers.get("content-type") || "";
+        const data = tipo.includes("application/json") ? await resp.json()
+                     : { ok: resp.ok, status: resp.status, text: await resp.text() };
+        // normalizar .ok
+        if (!resp.ok || (data && data.ok === false)){
+          return { ok:false, ...(data||{}), status: resp.status };
+        }
+        return { ok:true, ...(data||{}) };
+      } catch(e){
+        return { ok:false, error: "Fallo de red", detalle: e.message };
+      }
+    }
+
+    async function loadData(){
+      const r = await api({accion:"load", usuario, password});
+      if (!r.ok){ console.error(r); tarjetas = []; }
+      else { tarjetas = Array.isArray(r.tarjetas) ? r.tarjetas : []; }
+      render();
+    }
+
+    async function saveData(){
+      const r = await api({accion:"save", usuario, password, tarjetas});
+      if (!r.ok){ console.error("Error guardando:", r); }
+      else { console.log("Guardado OK", r.id); }
+    }
+
+    // ---------- Crear tarjeta ----------
+    document.getElementById("nt_save").onclick = async () => {
+      const obj = {
+        titulo : document.getElementById("nt_titulo").value.trim() || "Sin título",
+        texto  : document.getElementById("nt_contenido").value.trim() || "",
+        rowspan: document.getElementById("nt_rows").value || "1",
+        colspan: document.getElementById("nt_cols").value || "1",
+        color  : document.getElementById("nt_color").value || "#201a3a"
+      };
+      tarjetas.push(obj);
+      newOverlay.style.display = "none";
+      clearNewCardFields();
+      render();
+      await saveData();
+    };
+
+    function clearNewCardFields(){
+      document.getElementById("nt_titulo").value = "";
+      document.getElementById("nt_contenido").value = "";
+      document.getElementById("nt_rows").value = 1;
+      document.getElementById("nt_cols").value = 1;
+      document.getElementById("nt_color").value = "#201a3a";
+    }
+
+    // ---------- Render + DnD ----------
+    function render(){
+      tablero.innerHTML = "";
+      tarjetas.forEach((t, idx) => {
+        const c = tplTarjeta.content.cloneNode(true);
+        const art = c.querySelector(".tarjeta");
+        art.dataset.index = idx;
+
+        c.querySelector(".titulo").textContent = t.titulo || "Sin título";
+        const sec = c.querySelector("section");
+        sec.textContent = t.texto || "";
+        if (t.color) sec.style.background = t.color;
+
+        art.style.gridRow    = "span " + (t.rowspan || "1");
+        art.style.gridColumn = "span " + (t.colspan || "1");
+
+        c.querySelector(".eliminar").onclick = async () => {
+          tarjetas.splice(idx, 1);
+          render();
+          await saveData();
+        };
+
+        // DnD
+        const handle = c.querySelector(".drag-handle");
+        // Native HTML5 uses draggable on the article; we add visual feedback
+        art.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", String(idx));
+          art.classList.add("dragging");
+        });
+        art.addEventListener("dragend", () => art.classList.remove("dragging"));
+
+        // Allow drop on the whole board and on each card
+        art.addEventListener("dragover", (e) => e.preventDefault());
+        art.addEventListener("drop", async (e) => {
+          e.preventDefault();
+          const from = parseInt(e.dataTransfer.getData("text/plain"), 10);
+          const to   = parseInt(art.dataset.index, 10);
+          if (Number.isInteger(from) && Number.isInteger(to) && from !== to){
+            moveItem(tarjetas, from, to);
+            render();
+            await saveData();
+          }
+        });
+
+        tablero.appendChild(c);
+      });
+
+      // Also allow dropping in empty areas of the board (end position)
+      tablero.addEventListener("dragover", (e)=>e.preventDefault());
+      tablero.addEventListener("drop", async (e)=>{
+        const from = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        if (!Number.isInteger(from)) return;
+        // If dropped on empty space, move to the end
+        if (e.target === tablero){
+          moveItem(tarjetas, from, tarjetas.length-1);
+          render();
+          await saveData();
+        }
+      });
+    }
+
+    function moveItem(arr, from, to){
+      const item = arr.splice(from, 1)[0];
+      arr.splice(to, 0, item);
+    }
+  </script>
+</body>
+</html>
+

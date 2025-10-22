@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Plantillas</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="http://jocarsa.github.io/cssreset/cssreset.css">
+    <style>
+      body{display:flex;font-family:sans-serif;font-size:10px;}
+      nav{flex:1;padding:10px;display:flex;flex-direction:column;gap:10px;}
+      main{flex:8;background:MistyRose;}
+      button{
+        border:none;background:purple;border-radius:50px;
+        padding:5px;width:150px;color:white;text-align:left;
+      }
+      button .inicial{
+        width:20px;height:20px;background:white;border-radius:50px;color:purple;
+        display:inline-block;text-align:center;line-height:20px;text-transform:uppercase;
+      }
+      main{display:grid;grid-template-columns:auto auto auto auto;gap:10px;padding:10px;}
+      .tarjeta{background:white;box-shadow:0px 2px 4px rgba(0,0,0,0.3);overflow:hidden;transition:all 1s;}
+      .tarjeta:hover{transform:scale(1.02,1.02);}
+      .tarjeta header{background:purple;color:white;padding:10px;}
+      .tarjeta section{padding:10px;}
+    </style>
+  </head>
+  <body>
+    <nav>
+      
+    </nav>
+    <main>
+    </main>
+    <template id="elementomenu">
+      <button>
+        <span class="inicial">L</span>
+        <span class="texto">Letra</span>
+      </button>
+    </template>
+    <style>
+      .tarjeta{position:relative;border-radius:12px;}
+      .tarjeta .eliminar{
+        position:absolute;right:2px;top:2px;width:20px;height:20px;background:white;
+        font-size:10px;line-height:11px;text-align:center;
+      }
+    </style>
+    <template id="plantillatarjeta">
+      <article class="tarjeta">
+        <button class="eliminar">❌</button>
+        <header>
+          Cabecera de prueba
+        </header>
+        <section>
+          Contenido de prueba
+        </section>
+      </article>
+    </template>
+    
+    <style>
+      #contienemodal{
+        position:absolute;width:100%;height:100%;top:0px;left:0px;background:rgba(0,0,0,0.6);
+        display:flex;justify-content: center;align-items: center;
+        display:none;
+      }
+      #modal{
+        width:500px;height:300px;padding:20px;background:white;border-radius:5px;
+        box-shadow:0px 5px 10px black;
+        display:flex;flex-direction:column;justify-content: center;gap:5px; 
+      }
+      #modal input,#modal textarea,#modal button{
+        border:1px solid indigo;width:100%;
+      }
+    </style>
+    <div id="contienemodal">
+      <div id="modal">
+        <label for="titulo_nueva_tarjeta">Título de la nueva tarjeta</label>
+        <input type="text" id="titulo_nueva_tarjeta">
+        <label for="contenido_nueva_tarjeta">Contenido de la nueva tarjeta</label>
+        <textarea id="contenido_nueva_tarjeta"></textarea>
+        <label for="columnas_nueva_tarjeta">Expansión de columnas</label>
+        <input type="number" id="columnas_nueva_tarjeta" min=1 max=5 value=1 step=1>
+        <label for="filas_nueva_tarjeta">Expansión de filas</label>
+        <input type="number" id="filas_nueva_tarjeta" min=1 max=5 value=1 step=1>
+        <label for="color_nueva_tarjeta">Color</label>
+        <input type="color" id="color_nueva_tarjeta">
+        <button id="guardatarjeta">Guardar</button>
+      </div>
+    </div>
+    <script>
+    
+      let usuario = prompt("Introduce tu usuario:")
+      
+      /////////////////////////////// POBLAR MENU ////////////////////////////////////////////
+      
+      let elementosmenu = ["inicio","productos","clientes","pedidos","stock","empleados"];
+      
+      let contenedor = document.querySelector("nav");           // Contenedor
+      let plantilla = document.querySelector("#elementomenu");  // Plantilla en memoria
+      
+      for(let i = 0;i<elementosmenu.length;i++){
+        let clon = plantilla.content.cloneNode(true);             // Clon en memoria
+        // Lo interesante es que puedo modificar los elementos del clon
+        clon.querySelector(".texto").textContent = elementosmenu[i]
+        clon.querySelector(".inicial").textContent = elementosmenu[i][0] // Primer caracter
+        contenedor.appendChild(clon);                             // Pongo la plantilla en c
+      }
+      
+      let boton_nuevo = document.createElement("button");
+      boton_nuevo.textContent = "Crear nuevo elemento"
+      boton_nuevo.onclick = function(){
+        document.querySelector("#contienemodal").style.display = "flex"
+      }
+      contenedor.appendChild(boton_nuevo);
+      
+      let boton_guardatarjeta = document.querySelector("#guardatarjeta")
+      boton_guardatarjeta.onclick = function(){
+        let objeto = {
+          "titulo":document.querySelector("#titulo_nueva_tarjeta").value,
+          "texto":document.querySelector("#contenido_nueva_tarjeta").value,
+          "rowspan":document.querySelector("#filas_nueva_tarjeta").value,
+          "colspan":document.querySelector("#columnas_nueva_tarjeta").value
+        }
+        tarjetas.push(objeto)
+        localStorage.setItem("cartitas",JSON.stringify(tarjetas));
+        enviarFetch()
+        repintar(); ///////////////////////////////// VUELVE A PINTAR LAS TARJETAS
+        document.querySelector("#contienemodal").style.display = "none"
+      }
+      
+      /////////////////////////////// POBLAR TARJETAS ////////////////////////////////////////////
+      
+      let tarjetas = [
+        {"titulo":"Titulo 1","texto":"texto 1","rowspan":"1","colspan":"1"},
+        {"titulo":"Titulo 2","texto":"texto 2","rowspan":"1","colspan":"1"},
+        {"titulo":"Titulo 3","texto":"texto 3","rowspan":"1","colspan":"1"}
+
+      ]
+      tarjetas = JSON.parse(localStorage.getItem("cartitas"))
+      function repintar(){
+        let contenedortarjetas = document.querySelector("main");
+        contenedortarjetas.innerHTML = ""
+        let plantillatarjeta = document.querySelector("#plantillatarjeta");
+        for(let i = 0;i<tarjetas.length;i++){
+          let clontarjeta = plantillatarjeta.content.cloneNode(true); 
+          clontarjeta.querySelector("header").textContent = tarjetas[i].titulo
+          clontarjeta.querySelector("section").textContent = tarjetas[i].texto
+          clontarjeta.querySelector("article").style.gridRow = "span "+tarjetas[i].rowspan
+          clontarjeta.querySelector("article").style.gridColumn = "span "+tarjetas[i].colspan
+          clontarjeta.querySelector(".eliminar").setAttribute("rosalee_eliminar",i)
+          clontarjeta.querySelector(".eliminar").onclick = function(){
+            tarjetas.splice(this.getAttribute("rosalee_eliminar"),1)
+            localStorage.setItem("cartitas",JSON.stringify(tarjetas));
+            enviarFetch()
+            repintar()
+          }
+          contenedortarjetas.appendChild(clontarjeta)
+        }
+      }
+      repintar(); /////////////////// PARA QUE SE EJECUTE AL PRINCIPIO
+      enviarFetch()
+      
+       async function enviarFetch(){
+          let objetocompleto = {
+            "usuario":usuario,
+            "tarjetas":tarjetas
+          }
+          try {
+            const resp = await fetch("004-api.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(objetocompleto)
+            });
+            const tipo = resp.headers.get('content-type') || '';
+            let data = null;
+            if (tipo.includes('application/json')) {
+              data = await resp.json();
+            } else {
+              // por si el servidor devuelve texto/HTML en errores
+              data = { ok: resp.ok, status: resp.status, text: await resp.text() };
+            }
+            if (!resp.ok || (data && data.ok === false)) {
+              console.error("Error del servidor", data);
+            } else {
+              console.log("Guardado OK", data);
+            }
+          } catch (err) {
+            console.error("Fallo de red o CORS", err);
+          }
+        }
+      
+    </script>
+  </body>
+</html>

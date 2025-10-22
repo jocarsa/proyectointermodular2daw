@@ -1,0 +1,229 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Plantillas</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="http://jocarsa.github.io/cssreset/cssreset.css">
+    <style>
+      body{display:flex;font-family:sans-serif;font-size:10px;}
+      nav{flex:1;padding:10px;display:flex;flex-direction:column;gap:10px;}
+      main{flex:8;background:MistyRose;}
+      button{
+        border:none;background:purple;border-radius:50px;
+        padding:5px;width:150px;color:white;text-align:left;cursor:pointer;
+      }
+      button .inicial{
+        width:20px;height:20px;background:white;border-radius:50px;color:purple;
+        display:inline-block;text-align:center;line-height:20px;text-transform:uppercase;
+      }
+      main{display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:10px;padding:10px;}
+      .tarjeta{background:white;box-shadow:0px 2px 4px rgba(0,0,0,0.3);overflow:hidden;transition:all 0.2s ease;}
+      .tarjeta:hover{transform:translateY(-2px);}
+      .tarjeta header{background:purple;color:white;padding:10px;}
+      .tarjeta section{padding:10px;}
+      .tarjeta{position:relative;border-radius:12px;}
+      .tarjeta .eliminar{
+        position:absolute;right:2px;top:2px;width:20px;height:20px;background:white;
+        font-size:10px;line-height:11px;text-align:center;border:none;cursor:pointer;border-radius:4px;
+      }
+      #contienemodal{
+        position:absolute;width:100%;height:100%;top:0;left:0;background:rgba(0,0,0,0.6);
+        display:flex;justify-content:center;align-items:center;display:none;
+      }
+      #modal{
+        width:500px;max-width:90vw;height:auto;padding:20px;background:white;border-radius:8px;
+        box-shadow:0px 5px 10px rgba(0,0,0,0.4);
+        display:flex;flex-direction:column;gap:6px;
+      }
+      #modal input,#modal textarea,#modal button{
+        border:1px solid indigo;width:100%;padding:6px;border-radius:6px;font-size:12px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav></nav>
+    <main></main>
+
+    <template id="elementomenu">
+      <button>
+        <span class="inicial">L</span>
+        <span class="texto">Letra</span>
+      </button>
+    </template>
+
+    <template id="plantillatarjeta">
+      <article class="tarjeta">
+        <button class="eliminar" title="Eliminar">❌</button>
+        <header>Cabecera de prueba</header>
+        <section>Contenido de prueba</section>
+      </article>
+    </template>
+
+    <div id="contienemodal">
+      <div id="modal">
+        <label for="titulo_nueva_tarjeta">Título de la nueva tarjeta</label>
+        <input type="text" id="titulo_nueva_tarjeta" placeholder="Título">
+        <label for="contenido_nueva_tarjeta">Contenido de la nueva tarjeta</label>
+        <textarea id="contenido_nueva_tarjeta" rows="5" placeholder="Contenido"></textarea>
+        <label for="columnas_nueva_tarjeta">Expansión de columnas</label>
+        <input type="number" id="columnas_nueva_tarjeta" min="1" max="5" value="1" step="1">
+        <label for="filas_nueva_tarjeta">Expansión de filas</label>
+        <input type="number" id="filas_nueva_tarjeta" min="1" max="5" value="1" step="1">
+        <label for="color_nueva_tarjeta">Color</label>
+        <input type="color" id="color_nueva_tarjeta" value="#ffffff">
+        <button id="guardatarjeta">Guardar</button>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "005-api.php";
+
+      let usuario = prompt("Introduce tu usuario:");
+      if (!usuario) { usuario = "anon"; }
+
+      // ---------------- MENÚ ----------------
+      const elementosmenu = ["inicio","productos","clientes","pedidos","stock","empleados"];
+      const contenedor = document.querySelector("nav");
+      const plantilla = document.querySelector("#elementomenu");
+
+      for (let i=0; i<elementosmenu.length; i++){
+        const clon = plantilla.content.cloneNode(true);
+        clon.querySelector(".texto").textContent   = elementosmenu[i];
+        clon.querySelector(".inicial").textContent = elementosmenu[i][0];
+        contenedor.appendChild(clon);
+      }
+
+      const boton_nuevo = document.createElement("button");
+      boton_nuevo.textContent = "Crear nuevo elemento";
+      boton_nuevo.onclick = () => { document.querySelector("#contienemodal").style.display = "flex"; };
+      contenedor.appendChild(boton_nuevo);
+
+      // ---------------- ESTADO ----------------
+      let tarjetas = [];  // estado actual
+
+      // Carga inicial desde API (paso 2-5/6)
+      loadUsuario();
+
+      async function loadUsuario(){
+        try{
+          const resp = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuario, accion: "load" })
+          });
+          const data = await resp.json();
+
+          if (!resp.ok || data.ok === false) {
+            console.error("Error al cargar:", data);
+            // Si falla la carga, intenta leer localStorage como último recurso
+            const local = localStorage.getItem("cartitas");
+            tarjetas = local ? JSON.parse(local) : [];
+          } else {
+            if (data.existe) {
+              // Usuario existe: usar las tarjetas del último id
+              tarjetas = Array.isArray(data.tarjetas) ? data.tarjetas : [];
+              console.log(`Cargado usuario "${usuario}" con id=${data.id}`);
+            } else {
+              // Usuario no existe: workspace nuevo
+              tarjetas = []; // o tus defaults si prefieres:
+              // tarjetas = [
+              //   {"titulo":"Titulo 1","texto":"texto 1","rowspan":"1","colspan":"1"},
+              //   {"titulo":"Titulo 2","texto":"texto 2","rowspan":"1","colspan":"1"},
+              //   {"titulo":"Titulo 3","texto":"texto 3","rowspan":"1","colspan":"1"}
+              // ];
+              console.log(`Usuario "${usuario}" no existe todavía. Workspace nuevo.`);
+            }
+            // Sincroniza localStorage con lo cargado
+            localStorage.setItem("cartitas", JSON.stringify(tarjetas));
+          }
+        } catch(err){
+          console.error("Fallo de red al cargar", err);
+          const local = localStorage.getItem("cartitas");
+          tarjetas = local ? JSON.parse(local) : [];
+        } finally {
+          repintar();
+        }
+      }
+
+      // ---------------- MODAL GUARDAR NUEVA TARJETA ----------------
+      document.querySelector("#guardatarjeta").onclick = async function(){
+        const obj = {
+          "titulo" : document.querySelector("#titulo_nueva_tarjeta").value.trim() || "Sin título",
+          "texto"  : document.querySelector("#contenido_nueva_tarjeta").value.trim() || "",
+          "rowspan": document.querySelector("#filas_nueva_tarjeta").value || "1",
+          "colspan": document.querySelector("#columnas_nueva_tarjeta").value || "1",
+          "color"  : document.querySelector("#color_nueva_tarjeta").value || "#ffffff"
+        };
+        tarjetas.push(obj);
+        localStorage.setItem("cartitas", JSON.stringify(tarjetas));
+        await enviarFetch("save");  // inserta una nueva versión
+        repintar();
+        document.querySelector("#contienemodal").style.display = "none";
+        // limpiar campos
+        document.querySelector("#titulo_nueva_tarjeta").value = "";
+        document.querySelector("#contenido_nueva_tarjeta").value = "";
+        document.querySelector("#filas_nueva_tarjeta").value = 1;
+        document.querySelector("#columnas_nueva_tarjeta").value = 1;
+        document.querySelector("#color_nueva_tarjeta").value = "#ffffff";
+      };
+
+      // ---------------- PINTAR TARJETAS ----------------
+      function repintar(){
+        const cont = document.querySelector("main");
+        cont.innerHTML = "";
+        const tpl = document.querySelector("#plantillatarjeta");
+        for (let i=0; i<tarjetas.length; i++){
+          const t = tarjetas[i];
+          const clon = tpl.content.cloneNode(true);
+          clon.querySelector("header").textContent = t.titulo || "Sin título";
+          const section = clon.querySelector("section");
+          section.textContent = t.texto || "";
+          if (t.color) { section.style.background = t.color; }
+
+          const art = clon.querySelector("article");
+          art.style.gridRow    = "span " + (t.rowspan || "1");
+          art.style.gridColumn = "span " + (t.colspan || "1");
+
+          const btnDel = clon.querySelector(".eliminar");
+          btnDel.setAttribute("data-index", i);
+          btnDel.onclick = async function(){
+            const idx = +this.getAttribute("data-index");
+            tarjetas.splice(idx, 1);
+            localStorage.setItem("cartitas", JSON.stringify(tarjetas));
+            await enviarFetch("save"); // guarda versión tras eliminar
+            repintar();
+          };
+
+          cont.appendChild(clon);
+        }
+      }
+
+      // ---------------- API SAVE ----------------
+      async function enviarFetch(accion){
+        try {
+          const payload = { usuario, accion };
+          if (accion === "save") { payload.tarjetas = tarjetas; }
+
+          const resp = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          const tipo = resp.headers.get('content-type') || '';
+          const data = tipo.includes('application/json') ? await resp.json()
+                                                         : { ok: resp.ok, status: resp.status, text: await resp.text() };
+
+          if (!resp.ok || (data && data.ok === false)) {
+            console.error("Error del servidor", data);
+          } else {
+            console.log(`${accion.toUpperCase()} OK`, data);
+          }
+        } catch (err) {
+          console.error("Fallo de red o CORS", err);
+        }
+      }
+    </script>
+  </body>
+</html>
+
