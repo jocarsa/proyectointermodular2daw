@@ -2,23 +2,25 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Plantillas</title>
+  <title>Plantillas (Light)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="http://jocarsa.github.io/cssreset/cssreset.css">
   <style>
     :root{
-      --bg: #0f1020;
-      --bg2: #17182e;
-      --accent: #8b5cf6;
-      --accent-2: #a78bfa;
-      --text: #e7e7f7;
-      --muted: #a8b0c0;
-      --card: rgba(255,255,255,0.06);
-      --glass: rgba(255,255,255,0.08);
-      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      /* Light theme palette */
+      --bg: #f6f8fb;
+      --bg2: #ffffff;
+      --accent: #6366f1;       /* indigo-500 */
+      --accent-2: #a5b4fc;     /* indigo-200 */
+      --text: #1f2937;         /* gray-800 */
+      --muted: #6b7280;        /* gray-500 */
+      --card: #ffffff;
+      --glass: rgba(255,255,255,0.9);
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
       --radius: 16px;
       --radius-sm: 10px;
       --speed: .2s;
+      --border: #e5e7eb;
     }
 
     html, body { height:100%; }
@@ -26,8 +28,8 @@
       display:flex; gap:16px; padding:16px;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
       background:
-        radial-gradient(1000px 800px at 10% -20%, #1f1140 0%, transparent 60%),
-        radial-gradient(1000px 800px at 90% 120%, #102842 0%, transparent 60%),
+        radial-gradient(1000px 800px at 10% -20%, rgba(99,102,241,.15) 0%, transparent 60%),
+        radial-gradient(1000px 800px at 90% 120%, rgba(59,130,246,.12) 0%, transparent 60%),
         var(--bg);
       color: var(--text);
       overflow:hidden;
@@ -36,11 +38,11 @@
     nav{
       flex:1; min-width:240px; max-width:260px;
       display:flex; flex-direction:column; gap:12px;
-      background: var(--glass);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: var(--bg2);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 12px;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(4px);
       box-shadow: var(--shadow);
       height: calc(100vh - 32px);
       overflow: auto;
@@ -48,44 +50,46 @@
     .brand{
       display:flex; align-items:center; gap:10px; padding:10px;
       border-radius: var(--radius-sm);
-      background: linear-gradient(135deg, rgba(139,92,246,.25), rgba(167,139,250,.15));
-      color:white; font-weight:700; letter-spacing:.5px;
+      background: linear-gradient(135deg, rgba(99,102,241,.18), rgba(165,180,252,.12));
+      color:#111827; font-weight:700; letter-spacing:.5px;
+      border: 1px solid var(--border);
     }
     .brand .dot{
       width:10px; height:10px; border-radius:50%;
-      background: var(--accent-2); box-shadow:0 0 20px var(--accent);
+      background: var(--accent); box-shadow:0 0 12px var(--accent-2);
     }
 
     .btn-primary{
-      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      background: linear-gradient(135deg, var(--accent), #4f46e5);
       color:white; border:none; padding:10px 12px; border-radius: 999px; cursor:pointer;
-      transition: filter var(--speed), transform var(--speed);
-      box-shadow: 0 10px 20px rgba(139,92,246,0.25);
+      transition: filter var(--speed), transform var(--speed), box-shadow var(--speed);
+      box-shadow: 0 10px 20px rgba(99,102,241,0.20);
     }
-    .btn-primary:hover{ filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-primary:hover{ filter: brightness(1.06); transform: translateY(-1px); }
 
     main{
       flex:8; display:grid; grid-template-columns: repeat(4, minmax(0,1fr));
       gap:12px; padding:12px; height: calc(100vh - 32px); overflow:auto;
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+      background: var(--bg2);
       border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
       box-shadow: var(--shadow);
     }
 
     .tarjeta{
       position:relative; background: var(--card);
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
       transition: transform var(--speed), box-shadow var(--speed), border-color var(--speed);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
     }
     .tarjeta.dragging{
-      opacity: .85; transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,.45);
+      opacity: .95; transform: scale(1.01); box-shadow: 0 16px 40px rgba(0,0,0,.10);
       border-color: var(--accent-2);
     }
     .tarjeta header{
-      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      background: linear-gradient(135deg, var(--accent), #4f46e5);
       color:white; padding:12px; font-weight:700; letter-spacing:.3px;
       display:flex; align-items:center; justify-content: space-between;
     }
@@ -93,40 +97,42 @@
     .tarjeta section{ padding:12px; color: var(--text);height:100%; }
     .tarjeta .eliminar{
       position:absolute; right:8px; top:8px; width:26px; height:26px;
-      border:none; border-radius:8px; background: rgba(255,255,255,0.85); color:#5b21b6;
+      border:none; border-radius:8px; background: #fee2e2; color:#b91c1c;
       font-size:14px; cursor:pointer; display:grid; place-items:center;
-      transition: transform var(--speed);
+      transition: transform var(--speed), background var(--speed);
+      border: 1px solid #fecaca;
     }
-    .tarjeta .eliminar:hover{ transform: scale(1.06); }
+    .tarjeta .eliminar:hover{ transform: scale(1.06); background:#fecaca; }
 
     /* Boards */
     .board-btn{
-      border:none; background: transparent; color: var(--text); text-align:left; padding:10px 12px;
+      border:1px solid var(--border); background: #ffffff; color: var(--text); text-align:left; padding:10px 12px;
       border-radius: var(--radius-sm); display:flex; align-items:center; gap:10px; cursor:pointer;
-      transition: background var(--speed), transform var(--speed);
+      transition: background var(--speed), transform var(--speed), border-color var(--speed), box-shadow var(--speed);
       width:100%;
     }
-    .board-btn:hover{ background: rgba(255,255,255,0.06); transform: translateX(2px); }
-    .board-btn.active{ background: rgba(139,92,246,0.22); border: 1px solid rgba(139,92,246,0.45); }
+    .board-btn:hover{ background: #f3f4f6; transform: translateX(2px); }
+    .board-btn.active{ background: #eef2ff; border-color: #c7d2fe; box-shadow: inset 0 0 0 1px #c7d2fe; }
     .board-btn .inicial{
       width:26px;height:26px;border-radius:50%; display:inline-grid; place-items:center;
-      background: var(--text); color:#4b0082; font-weight:800;
+      background: #eef2ff; color:#3730a3; font-weight:800;
+      border: 1px solid #c7d2fe;
     }
     .board-del{
-      border:none; background: rgba(255,255,255,0.1); color:#fecaca; cursor:pointer; border-radius:8px; padding:6px 8px;
+      border:1px solid var(--border); background: #fff; color:#ef4444; cursor:pointer; border-radius:8px; padding:6px 8px;
     }
-    .board-del:hover{ background: rgba(239,68,68,0.25); }
+    .board-del:hover{ background: #fee2e2; }
 
     /* Modal base */
     .overlay{
-      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      position: fixed; inset: 0; background: rgba(0,0,0,0.35);
       display:none; align-items:center; justify-content:center; z-index: 20;
       backdrop-filter: blur(2px);
     }
     .modal{
       width: 520px; max-width: 92vw;
-      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
-      border: 1px solid rgba(255,255,255,0.18);
+      background: #ffffff;
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 18px; color: var(--text);
@@ -134,8 +140,8 @@
     .modal h2{ margin: 0 0 8px 0; }
     .modal label{ font-size:12px; color: var(--muted); }
     .modal input, .modal textarea, .modal select{
-      width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.08); color: var(--text); margin-bottom:8px;
+      width:100%; padding:10px; border-radius:10px; border:1px solid var(--border);
+      background: #fff; color: var(--text); margin-bottom:8px;
       outline: none;
     }
     .modal .actions{ display:flex; gap:8px; justify-content:flex-end; }
@@ -144,13 +150,27 @@
     #authOverlay{ display:flex; }
     .tabs{ display:flex; gap:8px; margin-bottom:10px; }
     .tab{
-      padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.25);
-      background: rgba(255,255,255,0.06); color: var(--text); cursor:pointer;
+      padding:8px 12px; border-radius:999px; border:1px solid var(--border);
+      background: #ffffff; color: var(--text); cursor:pointer;
+      transition: background var(--speed), border-color var(--speed);
     }
-    .tab.active{ background: linear-gradient(135deg, var(--accent), #6d28d9); border-color: transparent; }
+    .tab.active{ background: linear-gradient(135deg, var(--accent), #4f46e5); border-color: transparent; color:#fff; }
 
     .hidden{ display:none !important; }
-    hr{ border:none;height:1px;background:rgba(255,255,255,.08);margin:10px 0; }
+    hr{ border:none;height:1px;background:var(--border);margin:10px 0; }
+
+    /* Make grid responsive on small screens */
+    @media (max-width: 1200px){
+      main{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+    }
+    @media (max-width: 900px){
+      main{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 640px){
+      body{ flex-direction:column; overflow:auto; }
+      nav{ max-width:none; height:auto; }
+      main{ height:auto; }
+    }
   </style>
 </head>
 <body>
@@ -208,7 +228,7 @@
       <label>Filas (span)</label>
       <input type="number" id="nt_rows" min="1" max="5" value="1">
       <label>Color</label>
-      <input type="color" id="nt_color" value="#201a3a">
+      <input type="color" id="nt_color" value="#eef2ff">
       <div class="actions">
         <button class="tab" id="nt_cancel">Cancelar</button>
         <button class="btn-primary" id="nt_save">Guardar</button>
@@ -245,12 +265,12 @@
         </div>
       </div>
 
-      <div id="authMsg" style="margin-top:6px;color:#fca5a5;"></div>
+      <div id="authMsg" style="margin-top:6px;color:#ef4444;"></div>
     </div>
   </div>
 
   <script>
-    const API_URL = "007-api.php";
+    const API_URL = "008-api.php";
 
     // ---------- Estado ----------
     let usuario = null;
@@ -334,7 +354,7 @@
       if (!u || !p) { authMsg.textContent = "Rellena usuario y contraseña"; return; }
       const r = await api({accion:"signin", usuario:u, password:p});
       if (!r.ok) { authMsg.textContent = r.error || "Error al crear cuenta"; return; }
-      authMsg.style.color = "#86efac"; authMsg.textContent = "Cuenta creada. Ahora inicia sesión.";
+      authMsg.style.color = "#16a34a"; authMsg.textContent = "Cuenta creada. Ahora inicia sesión.";
       tabLogin.click();
       document.getElementById("login_usuario").value = u;
     };
@@ -462,7 +482,7 @@
         texto  : document.getElementById("nt_contenido").value.trim() || "",
         rowspan: document.getElementById("nt_rows").value || "1",
         colspan: document.getElementById("nt_cols").value || "1",
-        color  : document.getElementById("nt_color").value || "#201a3a"
+        color  : document.getElementById("nt_color").value || "#eef2ff"
       };
       ensureBoardsModel();
       const board = getActiveBoard();
@@ -473,7 +493,7 @@
       document.getElementById("nt_contenido").value = "";
       document.getElementById("nt_rows").value = 1;
       document.getElementById("nt_cols").value = 1;
-      document.getElementById("nt_color").value = "#201a3a";
+      document.getElementById("nt_color").value = "#eef2ff";
       render();
       await saveData();
     };
