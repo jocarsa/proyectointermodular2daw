@@ -1,7 +1,15 @@
 <?php
   if(isset($_POST['titulo'])){
     $db = new SQLite3('blog.db');
-    $resultado = $db->query("INSERT INTO articulos VALUES (NULL,'".$_POST['titulo']."','".$_POST['autor']."','".$_POST['fecha']."','".$_POST['contenido']."')");
+    $resultado = $db->query("
+      INSERT INTO articulos 
+      VALUES (
+        NULL,
+        '".$_POST['titulo']."',
+        '".$_POST['autor']."',
+        '".$_POST['fecha']."',
+        '".$_POST['contenido']."'
+       )");
     $db->close();
   }
   if(isset($_GET['operacion']) && $_GET['operacion'] == "eliminar"){
@@ -44,6 +52,7 @@
       </tbody>
     </table>
     <form action="?" method="POST">
+      <input type="hidden" value="tuformulario">
       <label>Introduce un nuevo título</label>
       <input type="text" name="titulo">
       <label>Introduce un nuevo autor</label>
